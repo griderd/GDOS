@@ -11,22 +11,30 @@
 ; Setup the origin address
 [ORG 0x7C00]
 
-%include "src/boot/print.asm"
+jmp main
 
-xor ax, ax		; clear AX
-mov ds, ax		; set the DS (data segment) register to zero (AX is zero)
-;mov ss, ax		; set the SS (stack segment) register (points to stack) to zero.
-;mov sp, 0x9C00	; set the SP (stack frame pointer) register to 2000h past the code start.
-				; Remember, the stack moves upward towards zero.
+%include "src/boot/video.asm"
+
+main:
+	xor ax, ax		; clear AX
+	mov ds, ax		; set the DS (data segment) register to zero (AX is zero)
+	mov ss, ax		; set the SS (stack segment) register (points to stack) to zero.
+	mov sp, 0x9C00	; set the SP (stack frame pointer) register to 2000h past the code start.
+					; Remember, the stack moves upward towards zero.
 				
-;cld 			; Clear direction flag (I don't know why)
+	cld 			; Clear direction flag (I don't know why)
 
-call BiosPrint msg
+	initvid: InitVideo
+	
+p1: PrintStr msg1
+p2: PrintStr msg2
 
 hang:
 	jmp hang
 	
-msg db 'Boot starting...', 13, 10, 0
+vpos: VideoPos		; Video Position Data
+msg1 db 'Boot starting...', 13, 10, 0
+msg2 db 'This is another message', 0
 	
 	; Fill the remaining space with zeros.
 	times 510-($-$$) db 0

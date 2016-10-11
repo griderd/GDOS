@@ -9,3 +9,7 @@ clean: cleandsk
 	
 cleandsk:
 	dd if=/dev/zero of=mnt/boot.img bs=512 count=2880
+	
+debug:
+	nasm src/boot/boot.asm -E -o src/boot/expanded_boot.asm
+	

@@ -9,9 +9,11 @@
 ;=========================================================================
 
 ; Setup the origin address
-[ORG 0x7C00]
+;[ORG 0x7C00]
 
-jmp main
+;jmp main
+
+%include "src/filesystem/fat12.asm"
 
 %include "src/boot/video.asm"
 
@@ -34,7 +36,6 @@ hang:
 	
 vpos: VideoPos		; Video Position Data
 msg1 db 'Boot starting...', 13, 10, 0
-msg2 db 'This is another message', 0
 	
 	; Fill the remaining space with zeros.
 	times 510-($-$$) db 0

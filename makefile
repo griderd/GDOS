@@ -1,8 +1,8 @@
 all: boot
 
-boot:
+boot: cleandsk
 	nasm src/boot/boot.asm -f bin -o bin/boot/boot.bin
-	dd if=bin/boot/boot.bin bs=512 of=mnt/boot.img
+	dd if=bin/boot/boot.bin bs=512 of=mnt/boot.img conv=notrunc
 	
 clean: cleandsk
 	rm bin/boot/boot.bin
@@ -12,4 +12,6 @@ cleandsk:
 	
 debug:
 	nasm src/boot/boot.asm -E -o src/boot/expanded_boot.asm
+	
+rebuild: clean boot
 	

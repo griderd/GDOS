@@ -1,6 +1,10 @@
 ; fat12.asm
 ; Implements the File Allocation Table, 12-bit, for floppy disks
 
+; Real Mode address calculation: segment * 16 + offset
+
+; The boot sector is loaded at 0000:7C00 = 0x0000 * 16 + 0x7C00 = 0x7C00
+;=========================================================================
 [BITS 16]
 [ORG 0x7C00]
 

@@ -2,19 +2,9 @@
 ; Assembly-based boot sector
 
 ; We're in REAL MODE
-
-; Real Mode address calculation: segment * 16 + offset
-
-; The boot sector is loaded at 0000:7C00 = 0x0000 * 16 + 0x7C00 = 0x7C00
 ;=========================================================================
 
-; Setup the origin address
-;[ORG 0x7C00]
-
-;jmp main
-
 %include "src/filesystem/fat12.asm"
-
 %include "src/boot/video.asm"
 
 main:
@@ -36,6 +26,7 @@ hang:
 	
 vpos: VideoPos		; Video Position Data
 msg1 db 'Boot starting...', 13, 10, 0
+
 	
 	; Fill the remaining space with zeros.
 	times 510-($-$$) db 0

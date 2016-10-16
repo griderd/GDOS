@@ -19,7 +19,6 @@ main:
 	initvid: InitVideo
 	
 p1: PrintStr msg1
-p2: PrintStr msg2
 
 hang:
 	jmp hang

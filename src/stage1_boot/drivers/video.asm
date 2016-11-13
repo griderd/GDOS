@@ -1,18 +1,50 @@
 ; video.asm
 ; VGA mode 3 video driver.
 
-%macro InitVideo 0
-	mov ax, 0xB800			; text video memory
-	mov es, ax
-%endmacro
-
 ; Prints a string to the screen using video memory
 ; Parameter: string to print
 
 %macro PrintStr 1
+	pusha
+	mov ax, 0xB800			; text video memory
+	mov es, ax
 	mov si, word %1
 	call prints
+	popa
 %endmacro
+
+; Print a word in hexadecimal
+%macro PrintHex 1
+	pusha
+	mov word [hexValue], %1
+	mov ax, 0xB800			; text video memory
+	mov es, ax
+	mov si, word hexStart
+	call prints
+	call printh
+	popa
+%endmacro
+
+printh:
+	mov di, hexOut
+	mov ax, [hexValue]
+	mov si, hexChars
+	mov cx, 4
+	
+	.start:
+		rol ax, 4
+		mov bx, ax
+		and bx, 0x0f
+		mov bl, [si + bx]
+		mov [di], bl
+		inc di
+		dec cx
+		jnz .start
+		
+		mov si, hexOut
+		call prints
+		
+		ret
 
 prints:
 	pusha					; push the registers onto the stack
@@ -89,4 +121,8 @@ print_CR:
 %macro VideoPos 0
 xpos db 0
 ypos db 0
+hexStart db '0x', 0
+hexChars db '0123456789ABCDEF'
+hexValue dw 0
+hexOut db '0000', 0
 %endmacro

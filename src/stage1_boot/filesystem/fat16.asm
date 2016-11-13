@@ -1,5 +1,5 @@
-; fat12.asm
-; Implements the File Allocation Table, 12-bit, for floppy disks
+; fat16.asm
+; Implements the File Allocation Table, 16-bit, for floppy disks
 
 ; Real Mode address calculation: segment * 16 + offset
 
@@ -30,4 +30,4 @@ Reserved			db 0
 ExtBootSignature	db 0x29			; Indicates the following three bytes fields are available
 VolumeSerialNumber	dd 0xA0A1A2A3	; Random 32-bit number to help track removable media and determine if the correct one is inserted.
 VolumeLabel			db '           '; 11-character field
-FileSystemType		db 'FAT12   '
+FileSystemType		db 'FAT16   '

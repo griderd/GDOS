@@ -15,7 +15,7 @@ SectorToCHS:
 ; and stores the result in AX
 SectorToLBA:	; FORMULA: LBA = (Sector - 2) * SectorsPerCluster
 	sub ax, 2
-	mul byte SectorsPerCluster
+	mul byte [SectorsPerCluster]
 	ret
 	
 ; Converts the LBA in AX to CHS and stores the result
@@ -32,15 +32,15 @@ LBAToCHS:
 	; Calculate Cylinder
 	; FORMULA: C = LBA / (HPC * SPT)
 	mov ax, HeadsPerCylinder
-	mul word SectorsPerTrack
+	mul SectorsPerTrack
 	div word [esp]	; The LBA is at the top of the stack
 	push ax		; Lets store the Cylinder for a while
 	
 	; Calculate Head
 	; FORMULA: H = (LBA / SPT) mod HPC
 	mov ax, [esp+2]	;Get the LBA (second on stack now)
-	div word SectorsPerTrack
-	div word HeadsPerCylinder
+	div SectorsPerTrack
+	div HeadsPerCylinder
 	push dx			; Remainder from DIV is stored in DX
 					; Lets store the Head for a while
 	xor dx, dx		; Clear DX for division later
@@ -48,7 +48,7 @@ LBAToCHS:
 	; Calculate Sector
 	; FORMULA: S = (LBA / SPT) + 1
 	mov ax, [esp+4]		; Get the LBA (third on stack now)
-	div word SectorsPerTrack
+	div SectorsPerTrack
 	add dx, 1		; Remainder from DIV is stored in DX
 	push dx			; Lets store the Sector for a while
 	

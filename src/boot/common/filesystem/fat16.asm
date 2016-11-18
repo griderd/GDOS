@@ -15,7 +15,8 @@ jmp main
 OEM_ID 				db 'GDOS    '	; OEM Identifier
 BytesPerSector		dw 512			; Bytes per sector. 1.44 MB disks have 1440 KB bytes, one sector, and one cluster
 SectorsPerCluster	db 1			; One sector per cluster. The whole disk is one sector.
-ReservedSectors		dw 1			; The number of reserved sectors. Includes the boot record.
+ReservedSectors		dw 3			; The number of reserved sectors. Includes the boot record.
+									; I'm using two additional sectors for a second-stage bootloader.
 NumberOfFATs		db 2			; The number of FATs.
 NumberOfRootEntries dw 512			; The number of possible root entries.
 TotalSectors		dw 2880			; Total number of sectors
@@ -31,3 +32,15 @@ ExtBootSignature	db 0x29			; Indicates the following three bytes fields are avai
 VolumeSerialNumber	dd 0xA0A1A2A3	; Random 32-bit number to help track removable media and determine if the correct one is inserted.
 VolumeLabel			db '           '; 11-character field
 FileSystemType		db 'FAT16   '
+
+%define ReservedRegion 		0
+%define ReservedRegion_Size	3
+
+%define FATRegion 			4
+%define FATRegion_Size		18
+
+%define RootDirRegion		22
+%define RootDirRegion_Size	32
+
+%define DataRegion 			54
+%define DataRegion_Size		2829

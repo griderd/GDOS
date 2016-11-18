@@ -4,26 +4,47 @@
 ; Prints a string to the screen using video memory
 ; Parameter: string to print
 
-%macro PrintStr 1
-	pusha
+ClearScreen:
+	mov byte[xpos], 0
+	mov byte[ypos], 0
 	mov ax, 0xB800			; text video memory
 	mov es, ax
-	mov si, word %1
-	call prints
-	popa
-%endmacro
+	mov ax, 0x20
+	mov bx, 0
+	
+.loop:
+	push bx
+	call printc
+	pop bx
+	inc bx
+	cmp bx, 2000
+	jl .loop
+	mov byte[xpos], 0
+	mov byte[ypos], 0
+	ret
 
-; Print a word in hexadecimal
-%macro PrintHex 1
-	pusha
-	mov word [hexValue], %1
+; Prints a string to the screen
+; Arguments:
+;	AX: Value
+; NOTE: Make sure you pusha before using the function!
+PrintStr:
+	mov si, ax
 	mov ax, 0xB800			; text video memory
+	mov es, ax
+	call prints
+	ret
+
+; Prints a word in hexadecimal
+; Arguments:
+;	AX: Value
+; NOTE: Make sure you pusha before using the function!
+PrintHex:
+	mov word [hexValue], ax
 	mov es, ax
 	mov si, word hexStart
 	call prints
 	call printh
-	popa
-%endmacro
+	ret
 
 printh:
 	mov di, hexOut
@@ -116,13 +137,20 @@ print_LF:
 print_CR:
 	mov byte[xpos], 0	; move to the beginning of the line
 	ret
+
+; Change the X-Y screen writing position to the value at AX, where AH is X and AL is Y
+ChangeXY:
+	mov byte[xpos], ah
+	mov byte[ypos], al
+	ret
 	
 	
-%macro VideoPos 0
+;%macro VideoPos 0
 xpos db 0
 ypos db 0
 hexStart db '0x', 0
 hexChars db '0123456789ABCDEF'
 hexValue dw 0
 hexOut db '0000', 0
-%endmacro
+spc db ' '
+;%endmacro

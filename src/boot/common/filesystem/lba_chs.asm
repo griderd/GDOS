@@ -1,4 +1,4 @@
-; lba_chs.asm
+; lba_chs.asmdi
 ; Converts Sector Index to Logical Block Addressing,
 ; and Logical Block Addressing to Cylinder-Head-Sector
 ; addressing for FAT file systems.
@@ -7,7 +7,7 @@
 
 ; Converts a Sector Index to CHS for use with INT 13h
 SectorToCHS:
-	call SectorToLBA
+	;call SectorToLBA
 	call LBAToCHS
 	ret
 
@@ -15,42 +15,57 @@ SectorToCHS:
 ; and stores the result in AX
 SectorToLBA:	; FORMULA: LBA = (Sector - 2) * SectorsPerCluster
 	sub ax, 2
-	mul byte [SectorsPerCluster]
+	mov bl, SectorsPerCluster
+	mul bl
 	ret
-	
-; Converts the LBA in AX to CHS and stores the result
-; in CH, CL, and DH for use with INT 13h.
+
+; LBA is in AX
+; LBA is in AX
 LBAToCHS:
-	push ax		; Temporarily store the LBA
-	xor ax, ax	; First, clear all of the registers
+	push ax			; store LBA
+	
+	; clear registers
+	xor ax, ax
 	xor bx, bx
 	xor cx, cx
-	xor dx, dx	; Make sure DX is clear for division later
-				; Division by 2 bytes results in a DX:AX / src
-				; Where : is concatenation
-				
-	; Calculate Cylinder
-	; FORMULA: C = LBA / (HPC * SPT)
-	mov ax, HeadsPerCylinder
-	mul SectorsPerTrack
-	div word [esp]	; The LBA is at the top of the stack
-	push ax		; Lets store the Cylinder for a while
+	xor dx, dx
+	
+	; Cylinder = LBA / (HeadsPerCylinder * SectorsPerTrack)
+	mov ax, word [HeadsPerCylinder]
+	mov bx, word [SectorsPerTrack]
+	mul bx
+	xor dx, dx			; Clear any overflow
+	mov bx, ax			; (HPC * SPT) is the bottom number, move to bx
+	mov ax, word [esp]	; Get the LBA
+	div bx				; Divides LBA by (HPC * SPT)
+	xor dx, dx
+	push ax				; Push the Cylinder onto the stack
+	
+	; Calculate Temp
+	; FORMULA: T = LBA % (HPC * SPT)
+	mov ax, word [HeadsPerCylinder]
+	mov bx, word [SectorsPerTrack]
+	mul bx
+	xor dx, dx
+	mov ax, word [esp+2]
+	div bx
+	push dx				; Push the temp value onto the stack
 	
 	; Calculate Head
-	; FORMULA: H = (LBA / SPT) mod HPC
-	mov ax, [esp+2]	;Get the LBA (second on stack now)
-	div SectorsPerTrack
-	div HeadsPerCylinder
-	push dx			; Remainder from DIV is stored in DX
-					; Lets store the Head for a while
-	xor dx, dx		; Clear DX for division later
-					
+	; FORMULA: H = T / SPC
+	mov ax, dx		; Get the temp value
+	mov bx, word [SectorsPerTrack]
+	xor dx, dx
+	div bx
+	push ax				; Push the Head onto the stack 
+	
 	; Calculate Sector
-	; FORMULA: S = (LBA / SPT) + 1
-	mov ax, [esp+4]		; Get the LBA (third on stack now)
-	div SectorsPerTrack
-	add dx, 1		; Remainder from DIV is stored in DX
-	push dx			; Lets store the Sector for a while
+	; FORMULA: S = T % SPC + 1
+	mov ax, word [esp+2]
+	mov bx, word [SectorsPerTrack]
+	div bx
+	inc dx
+	push dx
 	
 	; OK, all of the calculations are finished.
 	; It's time to arrange the data so that it'll
@@ -79,10 +94,15 @@ LBAToCHS:
 	mov dh, dl	; Put the head in DH. DL will contain the drive number
 	xor dl, dl	; Clear DL for the drive number
 	
+	; Next, get rid of the division number
+	pop ax
+	
 	; Lastly, the cylinder
 	pop bx
 	mov ch, bl	; Move the lower bits to CH
 	
-	; Clear BX
+	; Remove the LBA from the stack
+	pop ax
+	xor ax, ax
 	xor bx, bx
 	ret

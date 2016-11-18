@@ -54,16 +54,20 @@ resetFloppy:
 	jc resetFloppy  ; if the Carry Flag (CF) is set, an error occurred
 	
 loadStageTwo:
-	mov ah, 0x02
-	mov al, 0x01
-	mov bx, 0x0
-	mov es, bx
+	mov ah, 0x02	; INT 13h function 02h: Read Sectors into Memory
+	mov al, 0x01	; Number of sectors to read
+	mov bx, 0x0		
+	mov es, bx		; ES:BX is the address of the memory buffer
 	mov bx, 0x7E00
-	mov dl, 0x0
-	xor dx, dx
-	mov cx, 0x2
-	int 0x13
-	jc loadStageTwo
+	mov dl, 0x0		; Drive number. Bit 7 is set for hard disk. Disk 0 is a floppy.
+	mov dh, 0x0		; Drive head number
+	mov cx, 0x2		; CH - lower eight bits of the cylinder number
+					; CL - bits 0-5: sector number
+					;      bits 6-7: upper bits of the cylinder number (HDD only)
+	int 0x13		; Interrupt call 13h
+	jc loadStageTwo	; If the Carry Flag is set, there was an error. Try again.
+	
+	; TODO: Set this as an error-counted loop with an output in case of failure
 
 	jmp 0x0000:Stage2Location
 	
@@ -71,10 +75,10 @@ loadStageTwo:
 	
 msg1 db 'Boot starting...', 13, 10, 0
 
-	; Fill the remaining space with zeros.
-	times 510-($-$$) db 0
-	
-	; LEGACY BOOT SIGNATURE (0xAA55)
-	db 0x55
-	db 0xAA
+; Fill the remaining space with zeros.
+times 510-($-$$) db 0
+
+; LEGACY BOOT SIGNATURE (0xAA55)
+db 0x55
+db 0xAA
 	

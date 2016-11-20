@@ -31,6 +31,7 @@ PrintStr:
 	mov si, ax
 	mov ax, 0xB800			; text video memory
 	mov es, ax
+	xor ax, ax
 	call prints
 	ret
 

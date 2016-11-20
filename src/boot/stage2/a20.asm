@@ -65,5 +65,8 @@ a20_bios_method:
 	
 a20_enable:
 	call check_a20
+	cmp ax, 1
+	je .exit
 	call a20_bios_method
+.exit:
 	ret

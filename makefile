@@ -35,6 +35,7 @@ cleandsk:
 	
 debug:
 	nasm src/boot/stage1/boot.asm -E -o src/boot/expanded_boot.asm
+	nasm src/boot/stage2/boot.asm -E -o src/boot/expanded_boot2.asm
 	
 rebuild: clean boot
 	

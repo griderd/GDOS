@@ -1,7 +1,7 @@
 #$(eval stage1Size = $(shell stat --printf="%s" bin/boot/boot.bin))
 #@echo boot.bin is $(stage1Size) bytes long
 
-all: clearscreen boot
+all: clearscreen boot boot2 stat
 
 clearscreen:
 	@clear
@@ -12,13 +12,22 @@ boot: cleandsk
 	@nasm src/boot/stage1/boot.asm -f bin -o bin/boot/boot.bin
 	@echo Applying boot sector to disk...
 	@dd if=bin/boot/boot.bin bs=512 of=mnt/boot.img conv=notrunc status=none
+	@echo Done.
+	@echo
+	
+boot2:
 	@echo Assembling second-stage bootloader...
 	@nasm src/boot/stage2/boot.asm -f bin -o bin/boot/boot.sys
 	@echo Applying second-stage bootloader to disk...
 	@dd if=bin/boot/boot.sys bs=512 seek=1 of=mnt/boot.img conv=notrunc status=none
 	@echo Done.
-	@echo
-	@ls bin -l -R
+	@echo 
+	
+#kernel:
+#	@echo Building kernel...
+#	@nasm src/kernel/entry/kernelentry.asm -f bin -o bin/kernel.sys
+#	@echo Done.
+#	@echo
 	
 # Delete files and create an unformatted floppy image
 clean: cleandsk

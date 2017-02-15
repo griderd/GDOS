@@ -3,21 +3,7 @@
 ; and Logical Block Addressing to Cylinder-Head-Sector
 ; addressing for FAT file systems.
 
-; THIS REQUIRES "fat16.asm"
-
-; Converts a Sector Index to CHS for use with INT 13h
-SectorToCHS:
-	;call SectorToLBA
-	call LBAToCHS
-	ret
-
-; Converts the provided Sector Index in AX to LBA
-; and stores the result in AX
-SectorToLBA:	; FORMULA: LBA = (Sector - 2) * SectorsPerCluster
-	sub ax, 2
-	mov bl, SectorsPerCluster
-	mul bl
-	ret
+; THIS REQUIRES "fat16.asm" or "fat16helper.asm"
 
 ; LBA is in AX
 ; LBA is in AX
@@ -47,6 +33,7 @@ LBAToCHS:
 	mov bx, word [SectorsPerTrack]
 	mul bx
 	xor dx, dx
+	mov bx, ax
 	mov ax, word [esp+2]
 	div bx
 	push dx				; Push the temp value onto the stack
@@ -57,6 +44,7 @@ LBAToCHS:
 	mov bx, word [SectorsPerTrack]
 	xor dx, dx
 	div bx
+	xor dx, dx
 	push ax				; Push the Head onto the stack 
 	
 	; Calculate Sector

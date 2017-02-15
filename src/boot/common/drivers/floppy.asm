@@ -30,16 +30,17 @@ floppyReadCluster:
 	.start:
 		;pop ax			; Get the sector index to read
 		mov ax, word [esp+2]
-		call SectorToCHS
-
+		call LBAToCHS
+		
+		;pop bx			; Get the buffer offset
+		mov bx, word [esp+6]
+		;pop es			; Get the buffer segment
+		mov ax, word [esp+8]
+		mov es, ax
+		
 		;pop ax			; Get the number of sectors to read from AL
 		mov ax, word [esp+4]
 		mov ah, 0x02	; Function 2: Read sectors into memory
-		
-		;pop bx			; Get the buffer offset
-		mov bx, word [esp+8]
-		;pop es			; Get the buffer segment
-		mov ax, word [esp+10]
 		
 		int 0x13		; Read the data
 		
